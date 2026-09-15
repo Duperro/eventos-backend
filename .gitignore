@@ -1,24 +1,45 @@
 *.log
-.DS_Store
+
+# Environment files and local credentials
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
+/auth.json
+
+# PHP / Laravel generated files
 .phpactor.json
 .phpunit.result.cache
-/.fleet
-/.idea
-/.nova
+/.php-cs-fixer.cache
 /.phpunit.cache
-/.vscode
-/.zed
-/auth.json
+/.pint.cache
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+/storage/*.key
+/storage/framework/lsp-*.php
+/storage/pail
+/vendor
+
+# Front-end dependencies and generated assets
 /node_modules
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
-/vendor
+/.eslintcache
+
+# Test and coverage output
+/coverage
+
+# Editors
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Local development tools
 Homestead.json
 Homestead.yaml
+
+# Operating-system files
+.DS_Store
 Thumbs.db

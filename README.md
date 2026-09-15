@@ -9,6 +9,72 @@
 
 ## About Laravel
 
+## Deploy en Railway
+
+Railway detecta este proyecto como Laravel y lo ejecuta mediante PHP-FPM y Caddy; no se requiere un `Procfile`, Docker ni un comando de inicio personalizado. El servicio escucha el puerto asignado por Railway mediante su configuración nativa.
+
+1. Conecta este repositorio de GitHub al servicio de aplicación en Railway.
+2. En el mismo proyecto de Railway, crea un servicio **PostgreSQL**.
+3. En las variables del servicio Laravel, configura las siguientes variables. No subas un archivo `.env` ni valores secretos al repositorio.
+
+   ```text
+   APP_NAME=Eventos Backend
+   APP_ENV=production
+   APP_KEY=base64:...
+   APP_DEBUG=false
+   APP_URL=https://tu-dominio.up.railway.app
+   LOG_CHANNEL=stderr
+   LOG_LEVEL=info
+   DB_CONNECTION=pgsql
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
+   FRONTEND_URL=https://tu-dominio-systeme.io
+   ```
+
+   `DATABASE_URL` debe referenciar la variable del servicio PostgreSQL de Railway. La aplicación también admite `DB_URL` como alternativa para compatibilidad, pero no debes definir host, usuario ni contraseña en el código.
+
+4. Genera `APP_KEY` localmente, sin copiar archivos `.env`:
+
+   ```bash
+   php artisan key:generate --show
+   ```
+
+5. En Railway configura este **Pre-Deploy Command** para aplicar cambios de esquema de manera no destructiva:
+
+   ```bash
+   php artisan migrate --force
+   ```
+
+6. Para crear el evento inicial, ejecuta una vez desde la consola de Railway:
+
+   ```bash
+   php artisan db:seed --force
+   ```
+
+   El seeder es idempotente: puedes ejecutarlo de nuevo sin duplicar `evento-prueba`.
+
+7. Genera el dominio público en la sección **Networking** y configura `/api/health` como health check del servicio. Comprueba:
+
+   ```text
+   GET https://tu-dominio.up.railway.app/api/health
+   ```
+
+   Debe responder `200` con un JSON que identifica el estado de la aplicación sin exponer secretos.
+
+### CORS
+
+Las rutas `/api/*` permiten por defecto los orígenes locales `http://localhost:3000` y `http://localhost:5173`. En producción define `FRONTEND_URL` con el dominio HTTPS real de Systeme.io. Para permitir más de un origen, utiliza valores separados por comas. No se usa `*` como origen de producción.
+
+### Comandos útiles
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+php artisan route:list --path=api
+php artisan test
+```
+
+Nunca uses `php artisan migrate:fresh` en Railway o en una base de datos de producción.
+
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
 - [Simple, fast routing engine](https://laravel.com/docs/routing).
